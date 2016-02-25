@@ -4,8 +4,6 @@ import downloader
 import os
 
 
-
-
 class SitemapGruber():
     def __init__(self):
         self.parser_sitemap = crawl_parser.SitemapParser()
@@ -23,9 +21,10 @@ class SitemapGruber():
             os.remove(file)
         return url_list
 
-class HtmlGruber():
+
+class SiteGruber():
     def __init__(self):
         self.downloader = downloader.Downloader()
 
-    def get_url_from_html(self, url):
+    def get_url_from_html(self, site, url):
         pass

@@ -12,8 +12,10 @@ class RobotsParser():
         sitemaps = robots.sitemaps(site)
         return sitemaps
 
-    def check_allow(self, url):
-        pass
+    def check_allow(self, site, url):
+        robots = RobotsCache()
+        rules = robots.fetch(site)
+        return rules.allowed(url, '*')
 
 
 class SitemapParser():
@@ -55,3 +57,6 @@ class HtmlParser():
             count = len(re.findall(search_regul, text))
             if count:
                 self.rank.add_rank(count, id_url, query.person_id)
+
+    def get_url_from_pages(self, html_file):
+        soup = BeautifulSoup(open(html_file))

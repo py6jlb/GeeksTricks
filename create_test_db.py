@@ -139,8 +139,12 @@ person = Persons(name='Putin')
 session.add(person)
 session.commit()
 
-site = Sites(name='http://news.rambler.ru/')
+site = Sites(name='http://lenta.ru/')
 session.add(site)
+session.commit()
+
+site2 = Sites(name='http://news.rambler.ru/')
+session.add(site2)
 session.commit()
 
 person_id = session.query(Persons.id).filter_by(name='Putin').first()

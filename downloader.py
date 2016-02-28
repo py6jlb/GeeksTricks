@@ -1,4 +1,5 @@
 from urllib import request
+import requests
 import shutil
 import re
 import gzip
@@ -12,7 +13,7 @@ class Downloader():
         with gzip.open(file_name, 'rb') as archive, \
                 open(out_file_name, 'wb') as target_file:
             shutil.copyfileobj(archive, target_file)
-        os.remove('file_name')
+        os.remove(file_name)
         return out_file_name
 
     def download_file(self, url):
@@ -23,12 +24,17 @@ class Downloader():
             name = split_url[-2]
         # try download file
         try:
-            with request.urlopen(url) as response, open(name, 'wb') as out_file:
-                shutil.copyfileobj(response, out_file)
-                if name.endswith('.gz'):
-                    file_name = self._ungz_file(name)
-                    return file_name
-                else:
-                    return name
+            data = requests.get(url)
+            with open(name, "wb") as file:
+                file.write(data.content)
+            print('Скачалось ' + url)
+            if name.endswith('.gz'):
+                print('разархивируем...' + url)
+                file_name = self._ungz_file(name)
+                return file_name
+            else:
+                return name
         except:
+            print('нескачалось(((( ' + url)
             return False
+

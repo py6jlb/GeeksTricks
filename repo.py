@@ -12,10 +12,7 @@ from sqlalchemy.exc import IntegrityError
 class Repo():
 
     def __init__(self):
-        self.engine = create_engine(
-            'mysql+pymysql://Crawler:probation2016@178.218.115.116:64004'
-            '/GeeksTricks2?charset=utf8',
-            echo=False)
+        self.engine = create_engine('mysql+pymysql://Crawler:probation2016@178.218.115.116:64004/GeeksTricks2?charset=utf8',echo=True)
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
@@ -33,7 +30,7 @@ class PersonsRepo(Repo):
 class SitesRepo(Repo):
 
     def get_all(self):
-        payload_tuple = self.session.query(Sites).all()
+        payload_tuple = self.session.query(Sites.id, Sites.name).all()
         return payload_tuple
 
 
@@ -42,16 +39,25 @@ class PageRepo(Repo):
         payload_tuple = self.session.query(Pages).all()
         return payload_tuple
 
-    def add_url(self, url_list, id_site):
-        for url in url_list:
+    def add_url(self, url, id_site):
+        '''
+        bullet = Pages(url=url, site_id=id_site,
+                       found_date_time="{0:%Y-%m-%d %H:%M:%S}".format(
+                           datetime.utcnow()))
+        try:
+            self.session.add(bullet)
+            self.session.commit()
+        except IntegrityError:
+            self.session.rollback()
+        '''
+        if self.session.query(Pages).filter(Pages.url == url).first():
+            pass
+        else:
             bullet = Pages(url=url, site_id=id_site,
-                           found_date_time="{0:%Y-%m-%d %H:%M:%S}".format(
-                               datetime.utcnow()))
-            try:
-                self.session.add(bullet)
-                self.session.commit()
-            except IntegrityError:
-                self.session.rollback()
+                       found_date_time="{0:%Y-%m-%d %H:%M:%S}".format(
+                           datetime.utcnow()))
+            self.session.add(bullet)
+            self.session.commit()
 
     def add_last_scan_date(self, id_url):
         scan_date = '{0:%Y-%m-%d %H:%M:%S}'.format(datetime.utcnow())
@@ -60,14 +66,11 @@ class PageRepo(Repo):
         self.session.commit()
 
     def get_not_scan_urls(self):
-        result_tuple_list = self.session.query(Pages).filter(
+        result_set = self.session.query(Pages.id, Pages.url).filter(
             or_(Pages.last_scan_date == None, Pages.last_scan_date +
                 timedelta(days=1) < datetime.utcnow())).all()
-        return result_tuple_list
+        return result_set
 
-    def del_bad_url(self, url_id):
-        self.session.query(Pages).filter(Pages.id == url_id).delete()
-        self.session.commit()
 
 
 class PersonsPageRankRepo(Repo):
@@ -85,8 +88,5 @@ class PersonsPageRankRepo(Repo):
 
 class WordpairsRepo(Repo):
     def get_query(self):
-        result_tuple_list = self.session.query(Wordpairs.keyword_1,
-                                               Wordpairs.keyword_2,
-                                               Wordpairs.distance,
-                                               Wordpairs.person_id).all()
+        result_tuple_list = self.session.query(Wordpairs).all()
         return result_tuple_list

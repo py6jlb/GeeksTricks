@@ -5,15 +5,12 @@ from bs4 import BeautifulSoup
 from repo import PersonsPageRankRepo
 
 
-
-class RobotsParser():
+class SitemapParser():
     def get_sitemap_list(self, site):
         robots = RobotsCache()
         sitemaps = robots.sitemaps(site)
         return sitemaps
 
-
-class SitemapParser():
     def _gen_ns(self, tag):
         if tag.startswith('{'):
             ns, tag = tag.split('}')
@@ -21,31 +18,27 @@ class SitemapParser():
         else:
             return ''
 
+    def _get_file_name(self, url):
+        split_url = url.split('/')
+        if split_url[-1]:
+            name = split_url[-1]
+        else:
+            name = split_url[-2]
+        return name
+
     def parse_sitemap(self, sitemapfile, tmp_file, site_id):
         tree = ET.parse(sitemapfile)
         root = tree.getroot()
         namespaces = {'ns': self._gen_ns(root.tag)}
-        urls = []
         sitemaps = []
-        print('начинаем парсить Сайтмап')
         for child in root:
             url = child.find('ns:loc', namespaces=namespaces).text
-            split_url = url.split('/')
-            if split_url[-1]:
-                name = split_url[-1]
-            else:
-                name = split_url[-2]
-
+            name = self._get_file_name(url)
             if name.endswith('.xml') or 'sitemap' in name:
                 sitemaps.append(url)
-                print('add to sitemap ' + url)
             else:
                 tmp_file.write(url + '+!+' + str(site_id) + '\n')
-                '''
-                urls.append(url)
-                print('add to urls ' + url)
-                '''
-        return {'sitemap': sitemaps, 'urls': urls}
+        return sitemaps
 
 
 class HtmlParser():

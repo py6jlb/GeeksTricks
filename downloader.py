@@ -16,13 +16,16 @@ class Downloader():
         os.remove(file_name)
         return out_file_name
 
-    def download_file(self, url):
+    def _get_file_name(self, url):
         split_url = url.split('/')
         if split_url[-1]:
             name = split_url[-1]
         else:
             name = split_url[-2]
-        # try download file
+        return name
+
+    def download_file(self, url):
+        name = self._get_file_name(url)
         try:
             data = requests.get(url)
             with open(name, "wb") as file:
@@ -35,6 +38,6 @@ class Downloader():
             else:
                 return name
         except:
-            print('нескачалось(((( ' + url)
+            print(url + 'нескачалось(((( ')
             return False
 
